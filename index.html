@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Віртуальна прогулянка вулицею Андрія Кизила</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 968px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .intro {
+            margin-bottom: 2rem;
+        }
+        
+        .intro p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .street-view-container {
+            height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        #street-view {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-start {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+        
+        .btn-prev {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+        }
+        
+        .locations-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .location-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .location-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .location-item.active {
+            background-color: #e3f2fd;
+            border-left: 4px solid #3498db;
+        }
+        
+        .location-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .location-description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .info-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        
+        .info-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .audio-btn {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .audio-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .audio-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .progress-container {
+            flex-grow: 1;
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .audio-info {
+            font-size: 0.8rem;
+            color: #27ae60;
+            margin-top: 0.5rem;
+        }
+
+        .auto-play-notice {
+            font-size: 0.8rem;
+            color: #e67e22;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Віртуальна прогулянка вулицею Андрія Кизила</h1>
+        <div class="subtitle">Від початку вулиці до Художнього музею</div>
+    </header>
+    
+    <div class="container">
+        <div class="panel intro">
+            <p>Ласкаво просимо на віртуальну прогулянку однією з найцікавіших вулиць Умані - вулицею Андрія Кизила, названою на честь випускника Уманського ліцею № 2 та Героя України.</p>
+            <p>Колись вона називалася Суворовська, пізніше - Червоноармійська, а з 1954 р. отримала назву Коломенська. У 1853 р. вулиця була покрита бруківкою.</p>
+            <p>Під час прогулянки ви зможете дізнатися про архітектурні пам'ятки та цікаві об'єкти, що розташовані на цій вулиці.</p>
+        </div>
+        
+        <div class="layout">
+            <div class="panel">
+                <div class="street-view-container">
+                    <div id="street-view" class="loading">
+                        Завантаження панорами...
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-start" id="startBtn">Початок маршруту</button>
+                    <button class="btn btn-prev" id="prevBtn">← Назад</button>
+                    <button class="btn" id="nextBtn">Вперед →</button>
+                </div>
+                
+                <div class="panel">
+                    <h2 class="info-title" id="infoTitle">Вулиця Андрія Кизила</h2>
+                    <div class="info-content" id="infoContent">
+                        Оберіть точку на карті або в списку для перегляду інформації
+                    </div>
+                    <div class="audio-controls">
+                        <button class="audio-btn" id="audioBtn" disabled>
+                            <span>⏸</span> Пауза
+                        </button>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <span id="timeDisplay">0:00 / 0:00</span>
+                    </div>
+                    <div class="audio-info" id="audioInfo"></div>
+                    <div class="auto-play-notice" id="autoPlayNotice"></div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 style="margin-bottom: 1rem;">Точки інтересу</h2>
+                <div class="locations-list" id="locationsList">
+                    <!-- Список локацій буде додано через JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2 style="margin-bottom: 1rem; text-align: center;">Карта прогулянки</h2>
+            <div class="map-container" id="map"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Уманський ліцей № 2 &copy; 2023</p>
+    </footer>
+
+    <!-- Підключення Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfnYkA0HI4PJk-YudTSaw7OnWLWDOkoSY&callback=initMap&libraries=streetview" async defer></script>
+
+    <script>
+        // Дані про об'єкти на вулиці з попередньо завантаженими аудіо
+        const locations = [
+            {
+                id: 0,
+                name: "Початок вулиці Андрія Кизила",
+                description: "Ми знаходимося на початку вулиці Андрія Кизила, яка колись називалася Суворовська, пізніше - Червоноармійська, а з 1954 р. отримала назву Коломенська. У 1853 р. вулиця була покрита бруківкою. Саме звідси ми розпочнемо нашу віртуальну прогулянку.",
+                position: { lat: 48.744676, lng: 30.216211 },
+                heading: 20,
+                pitch: 5,
+                audioUrl: "audio/point0.mp3" // Замініть на ваш шлях до аудіо
+            },   
+            {
+                id: 1,
+                name: "Прибутковий будинок Шмуеля Ланда",
+                description: "Перед вами -- розкішний прибутковий будинок, споруджений упродовж 1898-1900 рр. на замовлення Шмуеля Ланда. З 1913 року будинок належав «1-му Уманському Позико-зберігальному товариству», головою якого був Петро Курінний. Будівля мала водопровід та каналізацію. Споруда двічі зазнавала значних пошкоджень та руйнувань, нині це житловий будинок неоренесансного стилю з елементами раннього модерну.",
+                position: { lat: 48.745903, lng: 30.216978 },
+                heading: 120,
+                pitch: 5,
+                audioUrl: "audio/point1.mp3" // Замініть на ваш шлях до аудіо
+            },  
+            {
+                id: 2,
+                name: "Уманський ліцей №2",
+                description: "На вулиці розташована одна з найстаріших будівель міста -- Уманський ліцей №2, який був споруджений 125 років тому. Призначення історичної пам'ятки досі незмінне, оскільки продовжує зберігати звичаї й традиції минулих поколінь, адаптуючись до викликів і потреб сьогодення. Це пам'ятка, що розповідає особливу історію -- історію про здобуття жінками нових прав і можливостей.",
+                position: { lat: 48.746596, lng: 30.217408 },
+                heading: 120,
+                pitch: 5,
+                audioUrl: "audio/point2.mp3" // Замініть на ваш шлях до аудіо
+            },  
+            {
+                id: 3,
+                name: "Центральний стадіон",
+                description: "Далі по вулиці розташований Центральний стадіон. Це був перший «Червоний стадіон» на Черкащині, який після кількох реконструкцій сьогодні став багатофункціональним спортивним комплексом.",
+                position: { lat: 48.747201, lng: 30.217760 },
+                heading: -90,
+                pitch: 5,
+                audioUrl: "audio/point3.mp3" // Замініть на ваш шлях до аудіо
+            },   
+            {
+                id: 4,
+                name: "Пожежна частина",
+                description: "Поряд знаходиться пожежна частина, перші відомості про неї в Умані знайдено в описі 1882 р., а в 1954 р. пожежники отримали це приміщення, у якому перебувають і дотепер.",
+                position: { lat: 48.748440, lng: 30.218516 },
+                heading: -85,
+                pitch: 5,
+                audioUrl: "audio/point4.mp3" // Замініть на ваш шлях до аудіо
+            },
+            {
+                id: 5,
+                name: "Художній музей",
+                description: "Її окрасою є Художній музей. Розташований у самому центрі міста, він є свідченням культурного розвитку міста та його багатої історії. Уманський костел Успіння Пресвятої Діви Марії був зведений на старому кладовищі, що додає особливого значення цьому архітектурному комплексу. З 1995 року будівля костелу поєднує дві функції: музейного виставкового залу та культурного простору.",
+                position: { lat: 48.749386, lng: 30.219128 },
+                heading: -75,
+                pitch: 5,
+                audioUrl: "audio/point5.mp3" // Замініть на ваш шлях до аудіо
+            }
+        ];
+
+        // Глобальні змінні
+        let map;
+        let panorama;
+        let currentLocationIndex = 0;
+        let isAudioPlaying = false;
+        let markers = [];
+        let currentAudio = null;
+        let autoPlayEnabled = true;
+
+        // Елементи DOM
+        const streetViewElement = document.getElementById('street-view');
+        const infoTitle = document.getElementById('infoTitle');
+        const infoContent = document.getElementById('infoContent');
+        const audioBtn = document.getElementById('audioBtn');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const locationsList = document.getElementById('locationsList');
+        const mapElement = document.getElementById('map');
+        const audioInfo = document.getElementById('audioInfo');
+        const autoPlayNotice = document.getElementById('autoPlayNotice');
+
+        // Ініціалізація карти
+        function initMap() {
+            // Центр карти - Умань
+            const uman = { lat: 48.7507, lng: 30.2230 };
+            
+            // Ініціалізація основної карти
+            map = new google.maps.Map(mapElement, {
+                center: uman,
+                zoom: 16,
+                styles: [
+                    {
+                        featureType: 'poi',
+                        elementType: 'labels',
+                        stylers: [{ visibility: 'on' }]
+                    }
+                ]
+            });
+            
+            // Ініціалізація Street View
+            panorama = new google.maps.StreetViewPanorama(
+                streetViewElement,
+                {
+                    position: locations[0].position,
+                    pov: { heading: locations[0].heading, pitch: locations[0].pitch },
+                    zoom: 1,
+                    addressControl: false,
+                    showRoadLabels: false,
+                    zoomControl: true,
+                    enableCloseButton: false
+                }
+            );
+            
+            // Додавання маркерів на карту
+            createMapMarkers();
+            
+            // Створення списку локацій
+            createLocationsList();
+            
+            // Показ першої локації
+            showLocationInfo(0);
+            
+            // Налаштування обробників подій
+            setupEventListeners();
+        }
+
+        // Створення маркерів на карті
+        function createMapMarkers() {
+            locations.forEach((location, index) => {
+                const marker = new google.maps.Marker({
+                    position: location.position,
+                    map: map,
+                    title: location.name,
+                    icon: {
+                        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                        scaledSize: new google.maps.Size(30, 30)
+                    }
+                });
+                
+                marker.addListener('click', () => {
+                    currentLocationIndex = index;
+                    showLocationInfo(index);
+                });
+                
+                markers.push(marker);
+            });
+        }
+
+        // Створення списку локацій
+        function createLocationsList() {
+            locations.forEach((location, index) => {
+                const item = document.createElement('div');
+                item.className = 'location-item';
+                const hasAudio = location.audioUrl ? ' 🎵' : '';
+                item.innerHTML = `
+                    <div class="location-name">${location.name}${hasAudio}</div>
+                    <div class="location-description">${location.description.substring(0, 100)}...</div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    currentLocationIndex = index;
+                    showLocationInfo(index);
+                });
+                
+                locationsList.appendChild(item);
+            });
+        }
+
+        // Показати інформацію про локацію
+        function showLocationInfo(index) {
+            const location = locations[index];
+            
+            // Зупинити поточне аудіо
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            
+            // Оновлення інформаційної панелі
+            infoTitle.textContent = location.name;
+            infoContent.textContent = location.description;
+            
+            // Оновлення Street View
+            panorama.setPosition(location.position);
+            panorama.setPov({
+                heading: location.heading,
+                pitch: location.pitch
+            });
+            
+            // Центрування карти на локації
+            map.setCenter(location.position);
+            
+            // Оновлення активного елемента в списку
+            updateActiveLocation(index);
+            
+            // Оновлення стану кнопок навігації
+            updateNavigationButtons();
+            
+            // Оновлення аудіо контролів
+            updateAudioControls(location);
+            
+            // Скидання аудіо
+            resetAudio();
+
+            // Автоматичне відтворення аудіо
+            if (autoPlayEnabled && location.audioUrl) {
+                setTimeout(() => {
+                    playAudio();
+                }, 1000); // Невелика затримка для кращого UX
+            }
+        }
+
+        // Оновити активний елемент в списку
+        function updateActiveLocation(index) {
+            const items = document.querySelectorAll('.location-item');
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Оновити стан кнопок навігації
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentLocationIndex === 0;
+            nextBtn.disabled = currentLocationIndex === locations.length - 1;
+        }
+
+        // Оновити аудіо контроли
+        function updateAudioControls(location) {
+            if (location.audioUrl) {
+                audioBtn.disabled = false;
+                audioInfo.textContent = 'Аудіо доступне для цієї точки';
+                audioInfo.style.color = '#27ae60';
+                
+                // Попередньо завантажуємо аудіо
+                if (!location.audio) {
+                    location.audio = new Audio(location.audioUrl);
+                    location.audio.preload = 'auto';
+                }
+
+                // Оновлюємо інформацію про автовідтворення
+                if (autoPlayEnabled) {
+                    autoPlayNotice.textContent = 'Аудіо автоматично відтворюється при переході на точку';
+                    autoPlayNotice.style.color = '#e67e22';
+                } else {
+                    autoPlayNotice.textContent = 'Автовідтворення вимкнено - натисніть кнопку для прослуховування';
+                    autoPlayNotice.style.color = '#e74c3c';
+                }
+            } else {
+                audioBtn.disabled = true;
+                audioInfo.textContent = 'Аудіо недоступне для цієї точки';
+                audioInfo.style.color = '#e74c3c';
+                autoPlayNotice.textContent = '';
+            }
+        }
+
+        // Налаштування обробників подій
+        function setupEventListeners() {
+            // Кнопки навігації
+            startBtn.addEventListener('click', () => {
+                currentLocationIndex = 0;
+                showLocationInfo(currentLocationIndex);
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                if (currentLocationIndex > 0) {
+                    currentLocationIndex--;
+                    showLocationInfo(currentLocationIndex);
+                }
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentLocationIndex < locations.length - 1) {
+                    currentLocationIndex++;
+                    showLocationInfo(currentLocationIndex);
+                }
+            });
+            
+            // Кнопка аудіо
+            audioBtn.addEventListener('click', toggleAudio);
+            
+            // Подвійний клік по кнопці аудіо для перемикання автовідтворення
+            audioBtn.addEventListener('dblclick', () => {
+                autoPlayEnabled = !autoPlayEnabled;
+                updateAudioControls(locations[currentLocationIndex]);
+            });
+            
+            // Обробка подій клавіатури
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    prevBtn.click();
+                } else if (e.key === 'ArrowRight') {
+                    nextBtn.click();
+                } else if (e.key === ' ') {
+                    e.preventDefault();
+                    toggleAudio();
+                }
+            });
+        }
+
+        // Управління аудіо
+        function toggleAudio() {
+            if (isAudioPlaying) {
+                pauseAudio();
+            } else {
+                playAudio();
+            }
+        }
+
+        function playAudio() {
+            const currentLocation = locations[currentLocationIndex];
+            if (!currentLocation.audio) return;
+            
+            currentAudio = currentLocation.audio;
+            
+            // Скидаємо аудіо на початок, якщо воно вже закінчилось
+            if (currentAudio.ended) {
+                currentAudio.currentTime = 0;
+            }
+            
+            currentAudio.play();
+            isAudioPlaying = true;
+            audioBtn.innerHTML = '<span>⏸</span> Пауза';
+            
+            // Оновлення прогресу
+            currentAudio.addEventListener('timeupdate', updateProgress);
+            currentAudio.addEventListener('ended', resetAudio);
+        }
+
+        function pauseAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                isAudioPlaying = false;
+                audioBtn.innerHTML = '<span>🔊</span> Відтворити';
+            }
+        }
+
+        function resetAudio() {
+            isAudioPlaying = false;
+            audioBtn.innerHTML = '<span>🔊</span> Відтворити';
+            progressBar.style.width = '0%';
+            timeDisplay.textContent = '0:00 / 0:00';
+            
+            if (currentAudio) {
+                currentAudio.currentTime = 0;
+                currentAudio.removeEventListener('timeupdate', updateProgress);
+                currentAudio.removeEventListener('ended', resetAudio);
+            }
+        }
+
+        function updateProgress() {
+            if (!currentAudio) return;
+            
+            const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            const currentTime = formatTime(currentAudio.currentTime);
+            const totalTime = formatTime(currentAudio.duration);
+            timeDisplay.textContent = `${currentTime} / ${totalTime}`;
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Обробка помилок завантаження Google Maps
+        window.gm_authFailure = function() {
+            alert('Помилка завантаження Google Maps. Перевірте API ключ.');
+        };
+    </script>
+</body>
+</html>
